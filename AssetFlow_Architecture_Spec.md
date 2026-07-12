@@ -189,7 +189,7 @@ Types are written in plain language (not Prisma syntax) since this is the spec, 
 
 ---
 
-## 6. Module-by-Module Flow
+## 6. Module _by-Module Flow
 
 ### Module 1 — Login/Signup
 Signup → Employee, `status=Active`, no role picker. Login issues short-lived JWT access token + httpOnly refresh cookie; every request re-validates via middleware. Forgot-password → time-limited reset token, emailed (or displayed directly for demo speed if email setup is a time sink). Admin promotion happens later, exclusively via Module 3C.
