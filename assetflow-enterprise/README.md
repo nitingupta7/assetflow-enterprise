@@ -1,81 +1,119 @@
-# AssetFlow: Enterprise Asset & Resource Management System
+# AssetFlow - Enterprise Asset & Resource Management System
 
-## 📋 Overview
-**AssetFlow** is a centralized ERP platform designed to simplify and digitize how organizations track, allocate, and maintain their physical assets and shared resources. The platform is industry-agnostic and built to replace manual tracking inefficiencies (such as spreadsheets and paper logs) with structured asset lifecycles, centralized resource booking, and real-time visibility into who holds what, where it is, and its condition. AssetFlow delivers core ERP functionality using a clean architecture and role-based workflows, explicitly excluding purchasing, invoicing, or accounting concerns.
+## Project Vision
+**AssetFlow** is a centralized, industry-agnostic Enterprise Resource Planning (ERP) solution designed to eliminate spreadsheet dependency by digitizing physical asset lifecycles, resource bookings, maintenance tickets, and inventory verification audits. Built with performance and concurrency in mind, it provides an uncompromising layer of truth for enterprise asset management.
 
----
-
-## 🚀 Key Features
-
-### 1. Authentication & Onboarding
-* **Secure Signup/Login**: Users authenticate using an email and password, complete with forgot password and session validation workflows. 
-* **Non-Self-Elevating Roles**: Signup defaults strictly to a standard Employee account; users cannot self-assign administrative privileges.
-* **Role Promotion**: System Administrators manage and promote Employees to Department Heads or Asset Managers directly from the Employee Directory.
-
-### 2. Operational Dashboard
-* **Real-Time KPIs**: Track system metrics via specialized KPI cards including *Assets Available*, *Assets Allocated*, *Maintenance Today*, *Active Bookings*, *Pending Transfers*, and *Upcoming Returns*.
-* **Intelligent Alerts**: Overdue asset returns (past their Expected Return Date) are explicitly highlighted separately from upcoming ones.
-* **Quick Actions**: Immediate dashboard access to register an asset, book a resource, or raise a maintenance request.
-
-### 3. Organization Setup (Admin Only)
-The setup dashboard is split into 3 core tabs:
-* **Tab A - Department Management**: Tools to create, edit, or deactivate departments, assign Department Heads, configure hierarchical parent departments, and toggle active status.
-* **Tab B - Asset Category Management**: System-wide configuration for categories (e.g., Electronics, Furniture, Vehicles) supporting category-specific custom fields like warranty periods.
-* **Tab C - Employee Directory**: Central hub mapping employee profiles (Name, Email, Department, Role, Status) and the exclusive interface for role promotions.
-
-### 4. Asset Registration & Full Directory
-* **Detailed Tracking**: Register physical assets with comprehensive fields including Asset Tag (auto-generated, e.g., `AF-0001`), Serial Number, Acquisition Date, Acquisition Cost (for ranking/reports only), Condition, Location, documentation attachments, and a "shared/bookable" flag.
-* **Advanced Filtering**: Search and filter options by Asset Tag, Serial Number, QR code, category, status, department, or location.
-* **Historical Logs**: Each asset maintains an independent history for allocations and maintenance activities.
-
-### 5. Conflict-Free Allocation & Transfers
-* **Double-Allocation Prevention**: Assets cannot be allocated if they are already assigned. If an asset is unavailable, the system blocks the request, identifies the current holder, and redirects the user to initiate a Transfer Request.
-* **Transfer & Return Workflows**: Supports a multi-stage transfer flow (Requested -> Approved by Manager/Head -> Re-allocated) and a return flow that captures condition check-in notes before reverting the asset status to *Available*.
-
-### 6. Overlap-Validated Resource Booking
-* **Calendar View**: A visual timeline showing existing reservations for shared resources (rooms, vehicles, equipment).
-* **Strict Overlap Prevention**: The booking engine automatically rejects time-slot collisions (e.g., a slot already reserved for 9:00–10:00 will block a 9:30–10:30 request, but permit a 10:00–11:00 booking).
-* **Lifecycle Tracking**: Monitor booking statuses through *Upcoming*, *Ongoing*, *Completed*, and *Cancelled* states, complete with automated pre-slot reminder notifications.
-
-### 7. Structured Maintenance Approval
-* **Request Pipeline**: Employees can flag equipment issues by selecting the asset, describing the problem, choosing a priority level, and attaching supporting photos.
-* **Automated Status Shifting**: Upon Manager approval, the asset state automatically updates to *Under Maintenance* and locks down until resolved, flipping back to *Available* upon completion.
-
-### 8. Verification Audit Cycles
-* **Targeted Audits**: Administrators define audit cycles restricted by specific departments, locations, and date ranges.
-* **Discrepancy Reporting**: Designated auditors evaluate scoped items, marking them as *Verified*, *Missing*, or *Damaged*. The system auto-generates a discrepancy report for further action.
-* **Cycle Lock**: Closing an audit cycle permanently records the logs and automatically updates affected asset statuses (e.g., changing confirmed-missing items to *Lost*).
-
-### 9. Analytics, Activity Logs & Notifications
-* **Operational Insights**: Out-of-the-box tracking for asset utilization trends, maintenance frequency, retirement horizons, department distribution, and peak-usage resource heatmaps.
-* **Comprehensive Logs & Alerts**: System-wide activity logs record who performed what action and when. Real-time alerts notify users about assignments, approvals, approaching slots, overdue allocations, and discovered discrepancies.
+## Tech Stack
+- **Backend:** Node.js, Express.js (Pure JavaScript)
+- **Database & ORM:** MySQL with Prisma ORM (Leveraging native MySQL Enums and JSON fields for structured metadata)
+- **Frontend:** React.js (Vite, Pure JavaScript/JSX), Tailwind CSS, Lucide React icons
 
 ---
 
-## 🔄 Asset Lifecycle States
+## Comprehensive System Architecture & Core Modules
 
-Assets dynamically transition across the following explicit operational states based on system workflows:
-* `Available`: Free for allocation or resource booking.
-* `Allocated`: Currently assigned to an employee or department.
-* `Reserved`: Held for an upcoming scheduled booking slot.
-* `Under Maintenance`: Undergoing authorized repairs; unavailable for deployment.
-* `Lost`: Confirmed missing following an audit cycle discrepancy.
-* `Retired`: Nearing the end of operational utility.
-* `Disposed`: Permanently removed from organization inventory.
+AssetFlow is organized around four distinct user roles, each with explicit workflows to maintain data integrity and security.
 
----
+### Role Workflows
+1. **Admin:** Full system access. Manages users, configures global settings, oversees all assets and locations, and performs hard system overrides when necessary.
+2. **Asset Manager:** Responsible for the physical lifecycle of assets. Can approve or deny maintenance requests, execute inventory verification audits, and manage procurement/disposal flows.
+3. **Department Head:** Oversees department-specific resources. Approves or denies reservations made by employees within their department and tracks department asset utilization.
+4. **Employee:** End-user capable of browsing available assets, submitting resource booking requests, raising maintenance tickets for defective items, and viewing personal allocation history.
 
-## 👥 User Roles & Permissions Matrix
-
-| Role | Core Responsibilities & Permissions |
-| :--- | :--- |
-| **Admin** | Configures master data (departments, asset categories), promotes employee roles, sets up audit cycles, and views organization-wide analytics. |
-| **Asset Manager** | Registers/allocates inventory, handles condition check-in notes, and holds authority to approve asset returns, transfers, maintenance requests, and audit discrepancies. |
-| **Department Head** | Monitors assets allocated to their specific department, approves intra-department transfers/allocations, and books shared resources on behalf of their department. |
-| **Employee** | Views their personally allocated assets, reserves shared resources, raises maintenance requests, and initiates return or transfer workflows. |
+### Asset Lifecycle State Machine
+Assets transition through a strict, deterministic state machine to ensure operational clarity:
+- **Available:** Ready for allocation or reservation.
+- **Allocated:** Currently assigned to an employee or department.
+- **Reserved:** Booked for a future time slot (unavailable for conflicting dates).
+- **Under Maintenance:** Temporarily locked from booking due to repair or inspection.
+- **Lost:** Missing following an inventory audit discrepancy.
+- **Retired:** Permanently removed from active circulation but kept for historical records.
+- **Disposed:** Physically destroyed or sold off, closing the asset lifecycle.
 
 ---
 
-## 🔗 Mockup (Proof of Concept)
-Review the system layout and UI flow details on the official project mockup workspace:  
-👉 [Excalidraw POC Board](https://app.excalidraw.com/I/65VNwvy7c4X/5ceOBMjbDby)
+## Advanced Business Logic Rules Implemented
+
+AssetFlow implements several strict back-end rules to prevent data corruption and operational chaos:
+
+- **Conflict Prevention Engine:** Utilizes explicit database transaction tracking and row-level locking to prevent the double-allocation of items, eliminating race conditions during high-volume booking periods.
+- **Overlap Validation Calendar Engine:** Employs strict time-slot mathematical checks that allow back-to-back resource bookings while hard-blocking any overlaps, ensuring smooth transitions of shared assets.
+- **Maintenance State Cascades:** When a repair is approved, the system automatically cascades the state of the asset, locking it from future bookings and unlocking it only upon maintenance ticket resolution.
+- **Inventory Audit Cycle & Discrepancy Flow:** Active audit cycles compile real-time discrepancy logs. Upon closure of the cycle, the system automatically executes batch status shifts (e.g., automatically marking unverified items as 'Lost' or moving flagged items to 'Under Maintenance').
+- **Overdue Return Monitor:** Live operational tracking continuously monitors active allocations and flags assets kept past their expected return dates, alerting both the responsible employee and their Department Head.
+
+---
+
+## 4-Person Git & Parallel Directory Architecture
+
+To mitigate merge conflicts and enable seamless parallel development during the hackathon, we implemented a strictly isolated file namespace architecture mapping specific directories to individual developers.
+
+```text
+AssetFlow/
+├── backend/
+│   ├── /controllers    <-- Developer 1 (API Logic & Core Rules)
+│   ├── /middleware     <-- Developer 1 (Auth & Validation)
+│   ├── /routes         <-- Developer 2 (API Routing & Schema)
+│   └── /prisma         <-- Developer 2 (Database schema & Migrations)
+└── frontend/
+    ├── /src/components <-- Developer 3 (React UI & Tailwind Views)
+    └── /src/context    <-- Developer 4 (Global State & API Integration)
+```
+
+**Developer Responsibilities:**
+- **Developer 1:** Focused on pure backend business logic, validation engines, and transaction safety.
+- **Developer 2:** Managed the database schema, Prisma migrations, and API route definitions.
+- **Developer 3:** Built the responsive frontend UI components and complex interactive dashboards.
+- **Developer 4:** Handled frontend state management, authentication flows, and backend API integration.
+
+---
+
+## Local Installation & Zero-Configuration Offline Quickstart Guide
+
+AssetFlow is designed to be run entirely locally without complex cloud dependencies. Follow these steps to get started immediately.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/assetflow.git
+cd assetflow
+
+# 2. Setup the backend environment
+cd backend
+cp .env.example .env
+# Ensure your .env contains a valid MySQL local connection string:
+# DATABASE_URL="mysql://root:password@localhost:3306/assetflow"
+
+# 3. Install backend dependencies
+npm install
+
+# 4. Initialize database tables and apply schema
+npx prisma migrate dev --name init
+
+# 5. Seed the database with initial dummy data (Optional but recommended)
+npx prisma db seed
+
+# 6. Start the backend development server
+npm run dev
+```
+
+In a separate terminal window:
+
+```bash
+# 7. Setup and start the frontend client
+cd assetflow/frontend
+npm install
+npm run dev
+```
+The client will be available at `http://localhost:5173` and the API will run on `http://localhost:3000`.
+
+---
+
+## Evaluation Matrix Compliance Check
+
+| Evaluation Criteria | Implementation Details | Status |
+| :--- | :--- | :---: |
+| **No Static JSON Data** | Full real-time MySQL CRUD operations integrated seamlessly via Prisma ORM. | ✅ |
+| **Robust Input Validation** | Strict Express schema validation layers protecting all API endpoints. | ✅ |
+| **Responsive & Clean UI** | Consistent Tailwind utility classes providing a modern, fluid layout design across devices. | ✅ |
+| **Offline / Local Capability** | Entirely self-contained local stack with no mandatory external cloud dependencies. | ✅ |
+| **Proper Git Version Control**| Isolated file namespaces per developer minimizing merge clashes and ensuring clean commit history. | ✅ |

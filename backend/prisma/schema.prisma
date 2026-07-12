@@ -1,0 +1,259 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  ASSET_MANAGER
+  DEPARTMENT_HEAD
+  EMPLOYEE
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ALLOCATED
+  MAINTENANCE
+  RETIRED
+  SCRAPPED
+}
+
+enum AllocationStatus {
+  ACTIVE
+  RETURNED
+  TRANSFERRED
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  REPORTED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum AuditStatus {
+  MATCHED
+  MISMATCHED
+  MISSING
+  PENDING
+}
+
+enum NotificationType {
+  ALLOCATION
+  BOOKING
+  MAINTENANCE
+  AUDIT
+  SYSTEM
+}
+
+// ─── User ────────────────────────────────────────────
+
+model User {
+  id            Int       @id @default(autoincrement())
+  name          String
+  email         String    @unique
+  password      String
+  phone         String?
+  role          Role      @default(EMPLOYEE)
+  isActive      Boolean   @default(true)
+
+  departmentId  Int?
+  department    Department? @relation("DepartmentUsers", fields: [departmentId], references: [id])
+
+  // Relations as employee
+  allocationsReceived  Allocation[]   @relation("AllocationEmployee")
+  allocationsGiven     Allocation[]   @relation("AllocationAllocator")
+  bookingsRequested    Booking[]      @relation("BookingRequester")
+  bookingsApproved     Booking[]      @relation("BookingApprover")
+  maintenanceReported  Maintenance[]  @relation("MaintenanceReporter")
+  maintenanceApproved  Maintenance[]  @relation("MaintenanceApprover")
+  audits               Audit[]        @relation("AuditAuditor")
+  notifications        Notification[]
+  assetsCreated        Asset[]        @relation("AssetCreator")
+  departmentsHeaded    Department[]   @relation("DepartmentHead")
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ─── Department ──────────────────────────────────────
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+
+  headId      Int?
+  head        User?    @relation("DepartmentHead", fields: [headId], references: [id])
+
+  users       User[]   @relation("DepartmentUsers")
+  assets      Asset[]
+  audits      Audit[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Category ────────────────────────────────────────
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+
+  assets      Asset[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Asset ───────────────────────────────────────────
+
+model Asset {
+  id            Int          @id @default(autoincrement())
+  assetTag      String       @unique
+  assetName     String
+  serialNumber  String?      @unique
+  purchaseDate  DateTime?
+  purchasePrice Float?
+  status        AssetStatus  @default(AVAILABLE)
+  location      String?
+
+  categoryId    Int
+  category      Category     @relation(fields: [categoryId], references: [id])
+
+  departmentId  Int
+  department    Department   @relation(fields: [departmentId], references: [id])
+
+  createdById   Int
+  createdBy     User         @relation("AssetCreator", fields: [createdById], references: [id])
+
+  allocations   Allocation[]
+  bookings      Booking[]
+  maintenance   Maintenance[]
+  audits        Audit[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// ─── Allocation ──────────────────────────────────────
+
+model Allocation {
+  id             Int               @id @default(autoincrement())
+  assetId        Int
+  asset          Asset             @relation(fields: [assetId], references: [id])
+
+  employeeId     Int
+  employee       User              @relation("AllocationEmployee", fields: [employeeId], references: [id])
+
+  allocatedById  Int
+  allocatedBy    User              @relation("AllocationAllocator", fields: [allocatedById], references: [id])
+
+  allocatedDate  DateTime          @default(now())
+  returnedDate   DateTime?
+  status         AllocationStatus  @default(ACTIVE)
+  reason         String?           @db.Text
+
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+// ─── Booking ─────────────────────────────────────────
+
+model Booking {
+  id            Int            @id @default(autoincrement())
+  assetId       Int
+  asset         Asset          @relation(fields: [assetId], references: [id])
+
+  requestedById Int
+  requestedBy   User           @relation("BookingRequester", fields: [requestedById], references: [id])
+
+  approvedById  Int?
+  approvedBy    User?          @relation("BookingApprover", fields: [approvedById], references: [id])
+
+  bookingDate   DateTime       @default(now())
+  startTime     DateTime
+  endTime       DateTime
+  status        BookingStatus  @default(PENDING)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+// ─── Maintenance ─────────────────────────────────────
+
+model Maintenance {
+  id             Int                @id @default(autoincrement())
+  assetId        Int
+  asset          Asset              @relation(fields: [assetId], references: [id])
+
+  reportedById   Int
+  reportedBy     User               @relation("MaintenanceReporter", fields: [reportedById], references: [id])
+
+  approvedById   Int?
+  approvedBy     User?              @relation("MaintenanceApprover", fields: [approvedById], references: [id])
+
+  technician     String?
+  issue          String             @db.Text
+  cost           Float?
+  status         MaintenanceStatus  @default(REPORTED)
+  startDate      DateTime?
+  endDate        DateTime?
+
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+// ─── Audit ───────────────────────────────────────────
+
+model Audit {
+  id               Int          @id @default(autoincrement())
+
+  departmentId     Int
+  department       Department   @relation(fields: [departmentId], references: [id])
+
+  auditorId        Int
+  auditor          User         @relation("AuditAuditor", fields: [auditorId], references: [id])
+
+  assetId          Int
+  asset            Asset        @relation(fields: [assetId], references: [id])
+
+  expectedLocation String?
+  actualLocation   String?
+  status           AuditStatus  @default(PENDING)
+  remarks          String?      @db.Text
+  auditDate        DateTime     @default(now())
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+// ─── Notification ────────────────────────────────────
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  user      User             @relation(fields: [userId], references: [id])
+
+  title     String
+  message   String           @db.Text
+  type      NotificationType @default(SYSTEM)
+  isRead    Boolean          @default(false)
+
+  createdAt DateTime         @default(now())
+}

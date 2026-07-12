@@ -1,0 +1,653 @@
+/* ============================================================
+   ResourceBooking.css
+   Scoped under .rb-* to avoid collisions with other screens.
+   Design: dark zinc theme matching the rest of AssetFlow.
+   ============================================================ */
+
+/* ---------- Screen wrapper -------------------------------- */
+.rb-screen {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4px 4px 48px;
+  color: #e4e7ec;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ---------- Page header ----------------------------------- */
+.rb-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.rb-page-title {
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.rb-page-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #71717a;
+}
+
+/* ---------- Controls bar ---------------------------------- */
+.rb-controls-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.rb-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rb-control-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #71717a;
+}
+.rb-select,
+.rb-input {
+  padding: 8px 12px;
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #e4e7ec;
+  font: inherit;
+  font-size: 0.88rem;
+  min-width: 220px;
+  transition: border-color 0.15s;
+}
+.rb-select:focus,
+.rb-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+/* Day navigation buttons (‹ Today ›) */
+.rb-date-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-end;
+}
+.rb-nav-btn {
+  padding: 8px 12px;
+  background: #27272a;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #a1a1aa;
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.rb-nav-btn:hover {
+  background: #3f3f46;
+  color: #f1f5f9;
+}
+.rb-today-btn {
+  font-weight: 600;
+  color: #10b981;
+  border-color: #065f46;
+}
+.rb-today-btn:hover {
+  background: #064e3b;
+  color: #34d399;
+}
+
+/* Maintenance warning banner */
+.rb-maintenance-warning {
+  background: #451a03;
+  border: 1px solid #92400e;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  font-size: 0.84rem;
+  color: #fbbf24;
+}
+
+/* ---------- Main grid ------------------------------------- */
+.rb-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 14px;
+}
+@media (max-width: 900px) {
+  .rb-main-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Panels ---------------------------------------- */
+.rb-panel {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.rb-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #27272a;
+  background: #1c1c1f;
+}
+.rb-panel-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.rb-panel-date {
+  font-weight: 400;
+  color: #71717a;
+  font-size: 0.85rem;
+}
+.rb-booking-count {
+  font-size: 0.75rem;
+  color: #52525b;
+  font-weight: 600;
+}
+
+/* Empty state */
+.rb-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 24px;
+  color: #52525b;
+  text-align: center;
+}
+.rb-empty-icon { font-size: 2.2rem; }
+.rb-empty-state p { margin: 0; font-size: 0.85rem; }
+
+/* ---------- Timeline ------------------------------------- */
+.rb-timeline-scroll {
+  overflow-y: auto;
+  max-height: 580px;
+  padding: 12px 0;
+}
+.rb-timeline-canvas {
+  position: relative;
+  margin-left: 56px;   /* space for hour labels */
+  margin-right: 12px;
+}
+.rb-timeline-blocks {
+  position: relative;
+  width: 100%;
+}
+
+/* Hour ruler */
+.rb-timeline-panel .hour-ruler {
+  position: absolute;
+  left: -56px;
+  top: 0;
+  width: 56px;
+  pointer-events: none;
+}
+.hour-mark {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hour-label {
+  font-size: 0.68rem;
+  color: #52525b;
+  white-space: nowrap;
+  width: 42px;
+  text-align: right;
+}
+.hour-line {
+  position: absolute;
+  left: 50px;
+  right: -100vw;   /* extends across the canvas */
+  height: 1px;
+  background: #27272a;
+  pointer-events: none;
+}
+
+/* Booking blocks (absolute positioned on the timeline) */
+.timeline-block {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: opacity 0.12s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  z-index: 2;
+}
+.timeline-block:hover { opacity: 0.88; transform: scaleX(0.99); }
+
+/* Status colour tokens for timeline blocks */
+.timeline-block.status-upcoming {
+  background: #064e3b;
+  border: 1px solid #10b981;
+  color: #a7f3d0;
+}
+.timeline-block.status-ongoing {
+  background: #1e3a5f;
+  border: 1px solid #3b82f6;
+  color: #bfdbfe;
+  animation: rb-pulse-border 2s ease-in-out infinite;
+}
+.timeline-block.status-completed {
+  background: #27272a;
+  border: 1px dashed #52525b;
+  color: #71717a;
+}
+.timeline-block.status-cancelled {
+  background: #1c0a0a;
+  border: 1px dashed #7f1d1d;
+  color: #7f1d1d;
+  text-decoration: line-through;
+}
+
+@keyframes rb-pulse-border {
+  0%, 100% { border-color: #3b82f6; }
+  50%       { border-color: #93c5fd; }
+}
+
+.block-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.block-time {
+  font-size: 0.68rem;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+.block-conflict-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fca5a5;
+  margin-top: 2px;
+}
+.block-ok-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #6ee7b7;
+  margin-top: 2px;
+}
+
+/* Ghost block (preview while filling booking form) */
+.timeline-block.ghost {
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.ghost-conflict {
+  background: #450a0a;
+  border: 2px dashed #ef4444;
+  color: #fca5a5;
+}
+.ghost-ok {
+  background: #022c22;
+  border: 2px dashed #10b981;
+  color: #6ee7b7;
+}
+
+/* ---------- Booking list panel --------------------------- */
+.rb-list-panel { display: flex; flex-direction: column; }
+
+/* Status filter tabs */
+.rb-status-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.rb-tab {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #71717a;
+  transition: background 0.12s, color 0.12s;
+}
+.rb-tab:hover { background: #27272a; color: #d4d4d8; }
+.rb-tab-active {
+  background: #27272a;
+  color: #10b981;
+  border-color: #065f46;
+}
+
+/* Booking list items */
+.rb-booking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  max-height: 540px;
+  flex: 1;
+}
+.rb-booking-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid #27272a;
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 8px;
+}
+.rb-booking-item:last-child { border-bottom: none; }
+.rb-booking-item:hover { background: #1c1c1f; }
+.rb-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.rb-item-user {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #d4d4d8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rb-item-time {
+  font-size: 0.75rem;
+  color: #71717a;
+}
+.rb-item-purpose {
+  font-size: 0.73rem;
+  color: #52525b;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rb-item-arrow {
+  color: #3f3f46;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ---------- Status badges --------------------------------- */
+.rb-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: fit-content;
+}
+.rb-status-badge.status-upcoming  { background: #064e3b; color: #34d399; }
+.rb-status-badge.status-ongoing   { background: #1e3a5f; color: #60a5fa; }
+.rb-status-badge.status-completed { background: #27272a; color: #71717a; }
+.rb-status-badge.status-cancelled { background: #1c0a0a; color: #f87171; }
+
+/* ---------- Conflict / availability banners -------------- */
+.rb-conflict-banner {
+  background: #450a0a;
+  border: 1px solid #7f1d1d;
+  border-left: 4px solid #ef4444;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.83rem;
+  color: #fca5a5;
+  margin: 8px 0;
+}
+.rb-available-banner {
+  background: #022c22;
+  border: 1px solid #064e3b;
+  border-left: 4px solid #10b981;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.83rem;
+  color: #6ee7b7;
+  margin: 8px 0;
+}
+.rb-reminder-banner {
+  background: #1c2433;
+  border: 1px solid #1e3a5f;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #93c5fd;
+  margin: 10px 0;
+}
+
+/* ---------- Buttons --------------------------------------- */
+.rb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+  white-space: nowrap;
+}
+.rb-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.rb-btn-lg { padding: 10px 22px; font-size: 0.9rem; }
+
+.rb-btn-primary {
+  background: #10b981;
+  color: #022c22;
+}
+.rb-btn-primary:not(:disabled):hover { background: #059669; }
+
+.rb-btn-ghost {
+  background: #27272a;
+  border-color: #3f3f46;
+  color: #d4d4d8;
+}
+.rb-btn-ghost:not(:disabled):hover { background: #3f3f46; }
+
+.rb-btn-danger {
+  background: #7f1d1d;
+  border-color: #991b1b;
+  color: #fca5a5;
+}
+.rb-btn-danger:not(:disabled):hover { background: #991b1b; }
+
+/* ---------- Modal ----------------------------------------- */
+.rb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+  animation: rb-fade-in 0.15s ease;
+}
+@keyframes rb-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.rb-modal {
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  animation: rb-slide-up 0.18s ease;
+}
+@keyframes rb-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.rb-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #27272a;
+}
+.rb-modal-asset {
+  margin: 0 0 2px;
+  font-size: 0.78rem;
+  color: #71717a;
+}
+.rb-tag {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  color: #10b981;
+  font-weight: 700;
+}
+.rb-modal-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.rb-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #71717a;
+  padding: 2px 4px;
+  transition: color 0.1s;
+}
+.rb-modal-close:hover { color: #f1f5f9; }
+
+.rb-modal-body { padding: 18px 20px; }
+
+.rb-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  margin-bottom: 8px;
+}
+.rb-detail-full { grid-column: span 2; }
+.rb-detail-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #71717a;
+  margin-bottom: 2px;
+}
+
+/* Reschedule inline form */
+.rb-reschedule-form {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #27272a;
+}
+.rb-section-label {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #a1a1aa;
+}
+
+/* Form fields inside modal */
+.rb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.83rem;
+  flex: 1;
+}
+.rb-field label {
+  font-weight: 600;
+  color: #a1a1aa;
+  font-size: 0.78rem;
+}
+.rb-field input,
+.rb-field select {
+  padding: 9px 10px;
+  background: #09090b;
+  border: 1px solid #3f3f46;
+  border-radius: 8px;
+  color: #e4e7ec;
+  font: inherit;
+  font-size: 0.84rem;
+  transition: border-color 0.14s;
+}
+.rb-field input:focus,
+.rb-field select:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+/* Make the native calendar + clock picker icon visible on dark backgrounds */
+.rb-field input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.rb-field input[type="date"]::-webkit-calendar-picker-indicator,
+.rb-field input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.6);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: filter 0.12s;
+}
+.rb-field input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+.rb-field input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.rb-field input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) opacity(1);
+}
+
+.rb-field-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.rb-optional {
+  font-weight: 400;
+  color: #52525b;
+  font-size: 0.75rem;
+}
+
+.rb-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #27272a;
+}
+
+/* Error text */
+.rb-error {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: #f87171;
+}
